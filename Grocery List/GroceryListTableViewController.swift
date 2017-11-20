@@ -11,7 +11,7 @@ import CoreData
 
 class GroceryListTableViewController: UITableViewController {
 
-    var groceries = [NSManagedObject]()
+    var groceries = [Grocery]()
     var managedObjectContext: NSManagedObjectContext?
     
     override func viewDidLoad() {
@@ -24,7 +24,9 @@ class GroceryListTableViewController: UITableViewController {
     }
 
     func loadData() {
-        let request: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "Grocery")
+//        let request: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "Grocery")
+        let request: NSFetchRequest<Grocery> = Grocery.fetchRequest()
+        
         
         do {
             let result = try managedObjectContext?.fetch(request)
@@ -48,12 +50,22 @@ class GroceryListTableViewController: UITableViewController {
         }
         
         let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] (action: UIAlertAction) in
-            let textField = alertController.textFields?.first
-//          self?.groceries.append((textField!.text)!)
+//            let textField = alertController.textFields?.first
+//
+//            let entity = NSEntityDescription.entity(forEntityName: "Grocery", in: (self?.managedObjectContext!)!)
+//            let grocery = NSManagedObject(entity: entity!, insertInto: self?.managedObjectContext)
+//            grocery.setValue(textField!.text!, forKey: "item")
             
-            let entity = NSEntityDescription.entity(forEntityName: "Grocery", in: (self?.managedObjectContext!)!)
-            let grocery = NSManagedObject(entity: entity!, insertInto: self?.managedObjectContext)
-            grocery.setValue(textField!.text!, forKey: "item")
+            let itemString: String?
+            
+            if(alertController.textFields?.first?.text != "") {
+                itemString = alertController.textFields?.first?.text
+            } else {
+                return
+            }
+            
+            let grocery = Grocery(context: (self?.managedObjectContext)!)
+            grocery.item = itemString
             
             do {
                 try self?.managedObjectContext?.save()
@@ -90,7 +102,7 @@ class GroceryListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "groceryCell", for: indexPath)
 
         let grocery = self.groceries[indexPath.row]
-        cell.textLabel?.text = grocery.value(forKey: "item") as? String
+        cell.textLabel?.text = grocery.item //.value(forKey: "item") as? String
 
         return cell
     }
